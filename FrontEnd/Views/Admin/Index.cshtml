@@ -1,0 +1,47 @@
+﻿@model IEnumerable<ProgrammingLogic.Util.User>
+<table id="users">
+    <tr>
+        <td>Name</td>
+        <td>scope</td>
+        <td>Email</td>
+    </tr>
+    @foreach (ProgrammingLogic.Util.User user in Model)
+    {
+
+    @* 1. At the time of splitting the emails, it was assuming that all emails were well written, but they weren't, so not all arrays had two elements, which caused the error.
+        I used a boolean and an if to validate it.
+        This could have happened when entering the information into the database and could represent a data integrity issue in a real scenario.
+        2. It was not recognizing some email domains because they were capitalized, so I used a method to lowercase them.'*@
+        string[] userInfo = user.email.ToLower().Split('@');
+        bool isValid = userInfo.Length == 2;
+        string scope;
+        
+        if (isValid)
+        {
+            switch (userInfo[1])
+            {
+                case "gmail.com":
+                case "hotmail.com":
+                case "outlook.com":
+                    scope = "public";
+                    break;
+                case "foundever.com":
+                case "sitel.com":
+                    scope = "restricted";
+                    break;
+                default:
+                    scope = "private";
+                    break;
+            }
+        } 
+        else 
+        {
+            scope = "It is not a valid email address, it is missing the '@'";
+        }
+        <tr>
+            <td>@user.name</td>
+            <td>@scope</td>
+            <td>@user.email</td>
+        </tr>
+    }
+</table>

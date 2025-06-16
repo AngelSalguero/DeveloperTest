@@ -1,0 +1,90 @@
+﻿@Html.ActionLink("Ir a Pokémons", "Index", "Pokemon")
+<a href="/Pokemon/PokemonIndex">Ir a Pokémons</a>
+
+
+<table id="pokemonList" class="users" border="1">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Image</th>
+            <th>Type(s)</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+@* 
+the task is to develop a functional script that effectively consumes the PokéAPI (here is the availabe documentation https://pokeapi.co/ 
+but we require you to consume this specific endpoint GET https://pokeapi.co/api/v2/pokemon)
+to retrieve and display information on the table with ID "pokemonList"; keep in mind that you should Handle API responses, including 
+successful data retrieval and potential error scenarios (e.g., network issues, invalid requests)*@
+
+<script>
+    async function loadPokemonExtended() {
+        const tableBody = document.querySelector("#pokemonList tbody");
+
+        try {
+            // Calls the API. It brings 20 by default.
+            const response = await fetch("https://pokeapi.co/api/v2/pokemon?limit=20");
+
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status} - ${response.statusText}`);
+            }
+
+            const data = await response.json();
+
+            for (const pokemon of data.results) {
+                try {
+                    const pokeDetails = await fetch(pokemon.url);
+                    if (!pokeDetails.ok) throw new Error("Details not found");
+
+                    const pokeData = await pokeDetails.json();
+
+                    const row = document.createElement("tr");
+
+                    // ID
+                    const idCell = document.createElement("td");
+                    idCell.textContent = pokeData.id;
+                    row.appendChild(idCell);
+
+                    // Name
+                    const nameCell = document.createElement("td");
+                    nameCell.textContent = pokeData.name;
+                    row.appendChild(nameCell);
+
+                    // Image
+                    const imgCell = document.createElement("td");
+                    const img = document.createElement("img");
+                    img.src = pokeData.sprites.front_default;
+                    img.alt = pokeData.name;
+                    img.width = 60;
+                    imgCell.appendChild(img);
+                    row.appendChild(imgCell);
+
+                    // Types
+                    const typesCell = document.createElement("td");
+                    typesCell.textContent = pokeData.types.map(t => t.type.name).join(", ");
+                    row.appendChild(typesCell);
+
+                    tableBody.appendChild(row);
+
+                } catch (innerError) {
+                    console.error("Error loading Pokemon details:", innerError);
+                }
+            }
+
+        } catch (error) {
+            console.error("Error fetching Pokémon list:", error);
+            const row = document.createElement("tr");
+            const cell = document.createElement("td");
+            cell.colSpan = 4;
+            cell.textContent = "Error loading the data. Try later.";
+            cell.style.color = "red";
+            row.appendChild(cell);
+            tableBody.appendChild(row);
+        }
+    }
+
+    loadPokemonExtended();
+</script>
