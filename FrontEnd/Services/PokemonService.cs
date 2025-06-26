@@ -25,29 +25,45 @@ namespace FrontEnd.Services
 
             var pokemons = new List<Pokemon>();
 
-            foreach (var entry in listResponse.Results)
+            //foreach (var entry in listResponse.Results)
+            //{
+            //    var detailsResponse = await _httpClient.GetAsync(entry.Url);
+            //    if (detailsResponse == null || !detailsResponse.IsSuccessStatusCode) throw new Exception($"Failed to fetch details for {entry.Name} - StatusCode: {detailsResponse?.StatusCode}");
+            //    //if (!detailsResponse.IsSuccessStatusCode) continue;
+
+            //    var detailsContent = await detailsResponse.Content.ReadAsStringAsync();
+
+            //    // ✅ Ahora deserializamos directamente al modelo
+            //    var pokemon = JsonConvert.DeserializeObject<Pokemon>(detailsContent);
+
+            //    // ✅ Validación básica por si falla la deserialización
+            //    if (pokemon != null)
+            //    {
+            //        pokemons.Add(pokemon);
+            //    }            
+            //}
+
+            //return pokemons;
+            var tasks = listResponse.Results.Select(async entry =>
             {
                 var detailsResponse = await _httpClient.GetAsync(entry.Url);
-                if (detailsResponse == null || !detailsResponse.IsSuccessStatusCode) throw new Exception("The value is not accepted");
-                if (!detailsResponse.IsSuccessStatusCode) continue;
+                if (!detailsResponse.IsSuccessStatusCode) return null;
 
                 var detailsContent = await detailsResponse.Content.ReadAsStringAsync();
-                dynamic pokeJson = JsonConvert.DeserializeObject(detailsContent);
+                return JsonConvert.DeserializeObject<Pokemon>(detailsContent);
+            });
 
-                var pokemon = new Pokemon
-                {
-                    Id = pokeJson.id,
-                    Name = pokeJson.name,
-                    ImageUrl = pokeJson.sprites.front_default,
-                    Types = ((IEnumerable<dynamic>)pokeJson.types)
-                            .Select(t => (string)t.type.name)
-                            .ToList()
-                };
+            var results = await Task.WhenAll(tasks);
+            return results.Where(p => p != null).ToList();
 
-                pokemons.Add(pokemon);
-            }
+        }
 
-            return pokemons;
+        public async Task<Pokemon?> GetPokemonByNameAsync(string name)
+        {
+            var response = await _httpClient.GetAsync($"https://pokeapi.co/api/v2/pokemon/{name}");
+            if (!response.IsSuccessStatusCode) throw new Exception($"Failed to fetch details for the pokemon- StatusCode: {response?.StatusCode}");
+            var content = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<Pokemon>(content);
         }
     }
 }

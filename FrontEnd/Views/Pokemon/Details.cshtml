@@ -1,0 +1,29 @@
+﻿@model FrontEnd.Models.Pokemon
+
+
+<h1>Detalles del Pokémon</h1>
+<tbody>
+
+        <ul>
+            <li>@Model.Id</li>
+            <li>@Model.Name</li>
+            <li>
+                <img src="@Model.Sprites.FrontDefault" alt="@Model.Name" width="60" />
+            </li>
+            <li>
+                @string.Join(", ", Model.Types.Select(t => t.Type.Name))
+            </li>
+            <li>
+                @string.Join(", ", Model.Abilities.Select(t => t.Ability.Name))
+            </li>
+            <li>Estadísticas:</li>
+            <ul>
+
+                @foreach (var stat in Model.Stats)
+                {
+                    <li>@stat.Stat.Name: @stat.BaseStat</li>
+                }
+            </ul>
+        </ul>
+
+</tbody>

@@ -18,10 +18,13 @@
                 <td>@p.Id</td>
                 <td>@p.Name</td>
                 <td>
-                    <img src="@p.ImageUrl" alt="@p.Name" width="60" />
+                    <img src="@p.Sprites.FrontDefault" alt="@p.Name" width="60" />
+                </td>   
+                <td>
+                    @string.Join(", ", p.Types.Select(t => t.Type.Name))
                 </td>
                 <td>
-                    @string.Join(", ", p.Types)
+                    <a href="@Url.Action("Details", "Pokemon", new { name = p.Name })" class="boton">Ver a @p.Name</a>
                 </td>
             </tr>
         }

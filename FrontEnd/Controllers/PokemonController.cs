@@ -18,5 +18,20 @@ namespace FrontEnd.Controllers
             var pokemons = await _pokemonService.GetPokemonsAsync(25);
             return View(pokemons);
         }
+
+        public async Task<IActionResult> Details(string name)
+        {
+            var pokemon = await _pokemonService.GetPokemonByNameAsync(name);
+            //if (string.IsNullOrEmpty(name))
+            //{
+            //    return NotFound();
+            //}
+            //var pokemon = await _pokemonService.GetPokemonByNameAsync(name);
+            //if (pokemon == null)
+            //{
+            //    return NotFound();
+            //}
+            return View(pokemon);
+        }
     }
 }
